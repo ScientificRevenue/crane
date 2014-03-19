@@ -13,6 +13,7 @@ var verbose bool
 var force bool
 var kill bool
 var config string
+var configFile string
 
 var printNotice func(format string, a ...interface{})
 var printError func(format string, a ...interface{})
@@ -134,6 +135,7 @@ See the corresponding docker commands for more information.`,
 
 	craneCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	craneCmd.PersistentFlags().StringVarP(&config, "config", "c", "", "config to read from")
+	craneCmd.PersistentFlags().StringVarP(&configFile, "config_file", "y", "", "config file to read from")
 	cmdLift.Flags().BoolVarP(&force, "force", "f", false, "force")
 	cmdLift.Flags().BoolVarP(&kill, "kill", "k", false, "kill containers")
 	cmdProvision.Flags().BoolVarP(&force, "force", "f", false, "force")

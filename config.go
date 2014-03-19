@@ -7,11 +7,18 @@ import (
 	"gopkg.in/v1/yaml"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func getContainers(config string) Containers {
 	if len(config) > 0 {
 		return unmarshalJSON([]byte(config))
+	}
+	if len(configFile) > 0 {
+		if strings.HasSuffix(configFile, ".yml") {
+			return readCraneYAML(configFile)
+		}
+		return readCraneJSON(configFile)
 	}
 	if _, err := os.Stat("crane.json"); err == nil {
 		return readCraneJSON("crane.json")
