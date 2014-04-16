@@ -42,6 +42,9 @@ func commandOutput(name string, args []string) (string, error) {
 func pipedCommandOutput(pipedCommandArgs ...[]string) ([]byte, error) {
 	var commands []exec.Cmd
 	for _, commandArgs := range pipedCommandArgs {
+		if isVerbose() {
+			fmt.Printf("\n--> %s %s\n", commandArgs[0], strings.Join(commandArgs[1:], " "))
+		}
 		cmd := exec.Command(commandArgs[0], commandArgs[1:]...)
 		commands = append(commands, *cmd)
 	}
