@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -31,6 +32,7 @@ type RunParameters struct {
 	Interactive bool        `json:"interactive" yaml:"interactive"`
 	Link        []string    `json:"link" yaml:"link"`
 	LxcConf     []string    `json:"lxc-conf" yaml:"lxc-conf"`
+	MappedVolumesFrom []string    `json:"mapped-volumes-from" yaml:"mapped-volumes-from"`
 	Memory      string      `json:"memory" yaml:"memory"`
 	Privileged  bool        `json:"privileged" yaml:"privileged"`
 	Publish     []string    `json:"publish" yaml:"publish"`
@@ -221,6 +223,15 @@ func (container Container) run() {
 		for _, lxcConf := range container.Run.LxcConf {
 			args = append(args, "--lxc-conf", os.ExpandEnv(lxcConf))
 		}
+		// MappedVolumesFrom
+		for _, mappedVolumesFrom := range container.Run.MappedVolumesFrom {
+			mappedVolumesFrom = os.ExpandEnv(mappedVolumesFrom)
+			x := strings.Split(mappedVolumesFrom, ":")
+			from, volume, dest := x[0], x[1], x[2]
+			src_volume_dir := getSourceForVolume(from, volume)
+			vol_map := strings.Join([]string{src_volume_dir, dest}, ":")
+			args = append(args, "--volume", vol_map)
+		}
 		// Memory
 		if len(container.Run.Memory) > 0 {
 			args = append(args, "--memory", os.ExpandEnv(container.Run.Memory))
@@ -340,3 +351,24 @@ func (container Container) rm() {
 		}
 	}
 }
+
+func getSourceForVolume(from, volume string) string {
+	args := []string{"inspect","--format={{.Volumes}}", from}
+	output, err := commandOutput("docker", args)
+	if err != nil {
+		panic(fmt.Sprintf("Cannot getSourceForVolume %v %v", from, volume))
+	}
+	// output looks like:
+	// map[/scirev-admin:/home/core/scirev-admin /var/log/nginx/pricingconsole:/home/core/pc_logs /var/log/pricingconsole:/home/core/pc_logs]
+	inner_part_regex := regexp.MustCompile("map[[](.*)[]]$")
+	inner := inner_part_regex.FindStringSubmatch(output)[1]
+	for _, vol_map := range strings.Split(inner, " ") {
+		x := strings.Split(vol_map, ":")
+		container_path, host_path := x[0], x[1]
+		if container_path == volume {
+			return host_path
+		}
+	}
+	panic(fmt.Sprintf("getSourceForVolume cannot find volume %v for container %v", volume, from))
+}
+
