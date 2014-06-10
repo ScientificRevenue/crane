@@ -52,11 +52,17 @@ func (container *Container) getId() (id string, err error) {
 	} else {
 		// Inspect container, extracting the Id.
 		// This will return gibberish if no container is found.
-		args := []string{"inspect", "--format={{.Id}}", container.Name}
+		args := []string{"inspect", "--format={{.Id}}|{{.ID}}", container.Name}
 		output, outErr := commandOutput("docker", args)
 		if err == nil {
-			id = output
-			container.Id = output
+			ids := strings.Split(output, "|")
+			for _, possible_id := range ids {
+				if possible_id != "<no value>" {
+					id = possible_id
+					container.Id = possible_id
+					return
+				}
+			}
 		} else {
 			err = outErr
 		}
