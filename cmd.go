@@ -68,6 +68,17 @@ If no Dockerfile is given, it will pull the image from the index.`,
 		},
 	}
 
+	var cmdPull = &cobra.Command{
+		Use:   "pull",
+		Short: "pull images",
+		Long: `
+pull will pull the image from the index.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			containers := getContainers(options)
+			containers.pull(options.force)
+		},
+	}
+
 	var cmdRun = &cobra.Command{
 		Use:   "run",
 		Short: "Run the containers",
@@ -195,10 +206,11 @@ See the corresponding docker commands for more information.`,
 	cmdLift.Flags().BoolVarP(&options.force, "force", "f", false, "force")
 	cmdLift.Flags().BoolVarP(&options.kill, "kill", "k", false, "kill containers")
 	cmdProvision.Flags().BoolVarP(&options.force, "force", "f", false, "force")
+	cmdPull.Flags().BoolVarP(&options.force, "force", "f", false, "force")
 	cmdRun.Flags().BoolVarP(&options.force, "force", "f", false, "force")
 	cmdRun.Flags().BoolVarP(&options.kill, "kill", "k", false, "kill containers")
 	cmdRm.Flags().BoolVarP(&options.force, "force", "f", false, "force")
 	cmdRm.Flags().BoolVarP(&options.kill, "kill", "k", false, "kill containers")
-	craneCmd.AddCommand(cmdLift, cmdProvision, cmdRun, cmdRm, cmdKill, cmdStart, cmdStop, cmdStatus, cmdVersion, cmdCheck, cmdHelp)
+	craneCmd.AddCommand(cmdLift, cmdProvision, cmdPull, cmdRun, cmdRm, cmdKill, cmdStart, cmdStop, cmdStatus, cmdVersion, cmdCheck, cmdHelp)
 	craneCmd.Execute()
 }

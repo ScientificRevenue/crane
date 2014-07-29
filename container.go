@@ -161,6 +161,14 @@ func (container Container) provision(force bool) {
 	}
 }
 
+func (container Container) pull(force bool) {
+	if force || !container.imageExists() {
+		container.pullImage()
+	} else {
+		print.Notice("Image %s does already exist. Use --force to re-pull.\n", container.Image)
+	}
+}
+
 // Run or start container
 func (container Container) runOrStart() {
 	if container.exists() {
@@ -268,12 +276,12 @@ func (container Container) run() {
 		}
 		// Volumes
 		for _, volume := range container.Run.Volume {
-			paths := strings.Split(volume, ":")
+			paths := strings.Split(os.ExpandEnv(volume), ":")
 			if !path.IsAbs(paths[0]) {
 				cwd, _ := os.Getwd()
 				paths[0] = cwd + "/" + paths[0]
 			}
-			args = append(args, "--volume", os.ExpandEnv(strings.Join(paths, ":")))
+			args = append(args, "--volume", strings.Join(paths, ":"))
 		}
 		// VolumesFrom
 		for _, volumeFrom := range container.Run.VolumesFrom {

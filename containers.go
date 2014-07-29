@@ -32,6 +32,14 @@ func (containers Containers) provision(force bool) {
 	}
 }
 
+// Pull containers.
+// When forced, this will pull all images.
+func (containers Containers) pull(force bool) {
+	for _, container := range containers.reversed() {
+		container.pull(force)
+	}
+}
+
 // Run containers.
 // When forced, removes existing containers first.
 func (containers Containers) run(force bool, kill bool) {
