@@ -22,6 +22,7 @@ type Container struct {
 }
 
 type RunParameters struct {
+	RawAddHost        []string    `json:"add-host" yaml:"add-host"`
 	Cidfile           string      `json:"cidfile" yaml:"cidfile"`
 	CpuShares         int         `json:"cpu-shares" yaml:"cpu-shares"`
 	Detach            bool        `json:"detach" yaml:"detach"`
@@ -47,6 +48,12 @@ type RunParameters struct {
 	Command           interface{} `json:"cmd" yaml:"cmd"`
 }
 
+func (r *RunParameters) AddHost() []string {
+	var addHost []string
+	for _, rawAddHost := range r.RawAddHost {
+		addHost = append(addHost, os.ExpandEnv(rawAddHost))
+	}
+	return addHost
 }
 
 func (container *Container) getId() (id string, err error) {
@@ -196,6 +203,11 @@ func (container Container) run() {
 		fmt.Printf("Running container %s ... ", container.Name)
 		// Assemble command arguments
 		args := []string{"run"}
+		// AddHost
+		for _, addHost := range container.Run.AddHost() {
+			args = append(args, "--add-host", addHost)
+		}
+
 		// Cidfile
 		if len(container.Run.Cidfile) > 0 {
 			args = append(args, "--cidfile", os.ExpandEnv(container.Run.Cidfile))
@@ -388,4 +400,3 @@ func getSourceForVolume(from, volume string) string {
 	}
 	panic(fmt.Sprintf("getSourceForVolume cannot find volume %v for container %v", volume, from))
 }
-
