@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/michaelsauter/crane/print"
 	"fmt"
 	"os"
 	"path"
@@ -9,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/michaelsauter/crane/print"
 )
 
 type Container struct {
@@ -16,34 +17,36 @@ type Container struct {
 	Name       string `json:"name" yaml:"name"`
 	Dockerfile string `json:"dockerfile" yaml:"dockerfile"`
 	Image      string `json:"image" yaml:"image"`
-	Manual     bool `json:"manual" yaml:"manual"`
+	Manual     bool   `json:"manual" yaml:"manual"`
 	Run        RunParameters
 }
 
 type RunParameters struct {
-	Cidfile     string      `json:"cidfile" yaml:"cidfile"`
-	CpuShares   int         `json:"cpu-shares" yaml:"cpu-shares"`
-	Detach      bool        `json:"detach" yaml:"detach"`
-	Dns         []string    `json:"dns" yaml:"dns"`
-	Entrypoint  string      `json:"entrypoint" yaml:"entrypoint"`
-	Env         []string    `json:"env" yaml:"env"`
-	Expose      []string    `json:"expose" yaml:"expose"`
-	Host        string      `json:"host" yaml:"host"`
-	Interactive bool        `json:"interactive" yaml:"interactive"`
-	Link        []string    `json:"link" yaml:"link"`
-	LxcConf     []string    `json:"lxc-conf" yaml:"lxc-conf"`
+	Cidfile           string      `json:"cidfile" yaml:"cidfile"`
+	CpuShares         int         `json:"cpu-shares" yaml:"cpu-shares"`
+	Detach            bool        `json:"detach" yaml:"detach"`
+	Dns               []string    `json:"dns" yaml:"dns"`
+	Entrypoint        string      `json:"entrypoint" yaml:"entrypoint"`
+	Env               []string    `json:"env" yaml:"env"`
+	Expose            []string    `json:"expose" yaml:"expose"`
+	Host              string      `json:"host" yaml:"host"`
+	Interactive       bool        `json:"interactive" yaml:"interactive"`
+	Link              []string    `json:"link" yaml:"link"`
+	LxcConf           []string    `json:"lxc-conf" yaml:"lxc-conf"`
 	MappedVolumesFrom []string    `json:"mapped-volumes-from" yaml:"mapped-volumes-from"`
-	Memory      string      `json:"memory" yaml:"memory"`
-	Privileged  bool        `json:"privileged" yaml:"privileged"`
-	Publish     []string    `json:"publish" yaml:"publish"`
-	PublishAll  bool        `json:"publish-all" yaml:"publish-all"`
-	Rm          bool        `json:"rm" yaml:"rm"`
-	Tty         bool        `json:"tty" yaml:"tty"`
-	User        string      `json:"user" yaml:"user"`
-	Volume      []string    `json:"volume" yaml:"volume"`
-	VolumesFrom []string    `json:"volumes-from" yaml:"volumes-from"`
-	Workdir     string      `json:"workdir" yaml:"workdir"`
-	Command     interface{} `json:"cmd" yaml:"cmd"`
+	Memory            string      `json:"memory" yaml:"memory"`
+	Privileged        bool        `json:"privileged" yaml:"privileged"`
+	Publish           []string    `json:"publish" yaml:"publish"`
+	PublishAll        bool        `json:"publish-all" yaml:"publish-all"`
+	Rm                bool        `json:"rm" yaml:"rm"`
+	Tty               bool        `json:"tty" yaml:"tty"`
+	User              string      `json:"user" yaml:"user"`
+	Volume            []string    `json:"volume" yaml:"volume"`
+	VolumesFrom       []string    `json:"volumes-from" yaml:"volumes-from"`
+	Workdir           string      `json:"workdir" yaml:"workdir"`
+	Command           interface{} `json:"cmd" yaml:"cmd"`
+}
+
 }
 
 func (container *Container) getId() (id string, err error) {
@@ -367,7 +370,7 @@ func (container Container) rm() {
 }
 
 func getSourceForVolume(from, volume string) string {
-	args := []string{"inspect","--format={{.Volumes}}", from}
+	args := []string{"inspect", "--format={{.Volumes}}", from}
 	output, err := commandOutput("docker", args)
 	if err != nil {
 		panic(fmt.Sprintf("Cannot getSourceForVolume %v %v", from, volume))
