@@ -37,6 +37,7 @@ type RunParameters struct {
 	LxcConf           []string    `json:"lxc-conf" yaml:"lxc-conf"`
 	MappedVolumesFrom []string    `json:"mapped-volumes-from" yaml:"mapped-volumes-from"`
 	Memory            string      `json:"memory" yaml:"memory"`
+	RawNet            string      `json:"net" yaml:"net"`
 	Privileged        bool        `json:"privileged" yaml:"privileged"`
 	Publish           []string    `json:"publish" yaml:"publish"`
 	PublishAll        bool        `json:"publish-all" yaml:"publish-all"`
@@ -63,6 +64,14 @@ func (r *RunParameters) Other() []string {
 		other = append(other, os.ExpandEnv(rawOther))
 	}
 	return other
+}
+func (r *RunParameters) Net() string {
+	// Default to bridge
+	if len(r.RawNet) == 0 {
+		return "bridge"
+	} else {
+		return os.ExpandEnv(r.RawNet)
+	}
 }
 
 func (container *Container) getId() (id string, err error) {
@@ -215,6 +224,10 @@ func (container Container) run() {
 		// AddHost
 		for _, addHost := range container.Run.AddHost() {
 			args = append(args, "--add-host", addHost)
+		}
+		// Net
+		if container.Run.Net() != "bridge" {
+			args = append(args, "--net", container.Run.Net())
 		}
 		// Other
 		for _, other := range container.Run.Other() {
