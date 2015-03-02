@@ -23,6 +23,7 @@ type Container struct {
 
 type RunParameters struct {
 	RawAddHost        []string    `json:"add-host" yaml:"add-host"`
+	RawOther          []string    `json:"other" yaml:"other"`
 	Cidfile           string      `json:"cidfile" yaml:"cidfile"`
 	CpuShares         int         `json:"cpu-shares" yaml:"cpu-shares"`
 	Detach            bool        `json:"detach" yaml:"detach"`
@@ -54,6 +55,14 @@ func (r *RunParameters) AddHost() []string {
 		addHost = append(addHost, os.ExpandEnv(rawAddHost))
 	}
 	return addHost
+}
+
+func (r *RunParameters) Other() []string {
+	var other []string
+	for _, rawOther := range r.RawOther {
+		other = append(other, os.ExpandEnv(rawOther))
+	}
+	return other
 }
 
 func (container *Container) getId() (id string, err error) {
@@ -206,6 +215,10 @@ func (container Container) run() {
 		// AddHost
 		for _, addHost := range container.Run.AddHost() {
 			args = append(args, "--add-host", addHost)
+		}
+		// Other
+		for _, other := range container.Run.Other() {
+			args = append(args, other)
 		}
 
 		// Cidfile
