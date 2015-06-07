@@ -31,7 +31,7 @@ type RunParameters struct {
 	Entrypoint        string      `json:"entrypoint" yaml:"entrypoint"`
 	Env               []string    `json:"env" yaml:"env"`
 	Expose            []string    `json:"expose" yaml:"expose"`
-	Host              string      `json:"host" yaml:"host"`
+	Hostname          string      `json:"hostname" yaml:"hostname"`
 	Interactive       bool        `json:"interactive" yaml:"interactive"`
 	Link              []string    `json:"link" yaml:"link"`
 	LxcConf           []string    `json:"lxc-conf" yaml:"lxc-conf"`
@@ -262,9 +262,9 @@ func (container Container) run() {
 		for _, expose := range container.Run.Expose {
 			args = append(args, "--expose", os.ExpandEnv(expose))
 		}
-		// Host
-		if len(container.Run.Host) > 0 {
-			args = append(args, "--hostname", os.ExpandEnv(container.Run.Host))
+		// Hostname
+		if len(container.Run.Hostname) > 0 {
+			args = append(args, "--hostname", os.ExpandEnv(container.Run.Hostname))
 		}
 		// Interactive
 		if container.Run.Interactive {
