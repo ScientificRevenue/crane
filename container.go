@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path"
@@ -410,9 +411,42 @@ func (container Container) rm() {
 func getSourceForVolume(from, volume string) string {
 	args := []string{"inspect", "--format={{.Volumes}}", from}
 	output, err := commandOutput("docker", args)
-	if err != nil {
-		panic(fmt.Sprintf("Cannot getSourceForVolume %v %v", from, volume))
+	if err != nil || output == "<no value>" {
+		return getSourceForVolumeFromMounts(from, volume)
 	}
+	return getSourceForVolumeFromVolumes(output, volume)
+}
+
+type Mount struct {
+	Source      string
+	Destination string
+	Mode        string
+	RW          bool
+}
+
+type Mounts []Mount
+
+func getSourceForVolumeFromMounts(from, volume string) string {
+	args := []string{"inspect", "--format={{json .Mounts}}", from}
+	output, err := commandOutput("docker", args)
+	if err != nil {
+		panic(fmt.Sprintf("Cannot getSourceForVolumeFromMounts %v %v %v", from, volume, err))
+	}
+
+	var mounts Mounts
+	err = json.Unmarshal([]byte(output), &mounts)
+	if err != nil {
+		panic(fmt.Sprintf("Cannot parse Mounts from inspect %v %v", output, err))
+	}
+	for _, mount := range mounts {
+		if mount.Destination == volume {
+			return mount.Source
+		}
+	}
+	panic(fmt.Sprintf("Cannot find Mount matching volume %v output %v", volume, output))
+}
+
+func getSourceForVolumeFromVolumes(output, volume string) string {
 	// output looks like:
 	// map[/scirev-admin:/home/core/scirev-admin /var/log/nginx/pricingconsole:/home/core/pc_logs /var/log/pricingconsole:/home/core/pc_logs]
 	inner_part_regex := regexp.MustCompile("map[[](.*)[]]$")
@@ -424,5 +458,5 @@ func getSourceForVolume(from, volume string) string {
 			return host_path
 		}
 	}
-	panic(fmt.Sprintf("getSourceForVolume cannot find volume %v for container %v", volume, from))
+	panic(fmt.Sprintf("getSourceForVolumeFromVolumes cannot find volume %v inspect output %v", volume, output))
 }
