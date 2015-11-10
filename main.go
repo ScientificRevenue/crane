@@ -5,6 +5,7 @@ import (
 	"github.com/michaelsauter/crane/print"
 	"os"
 	"os/exec"
+	"runtime/debug"
 	"strings"
 )
 
@@ -12,7 +13,8 @@ func main() {
 	// On panic, recover the error and display it
 	defer func() {
 		if err := recover(); err != nil {
-			print.Error("ERROR: %s\n", err)
+			print.Error("ERROR: %v\n\n", err)
+			debug.PrintStack()
 		}
 	}()
 
