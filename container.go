@@ -81,7 +81,7 @@ func (container *Container) getId() (id string, err error) {
 	} else {
 		// Inspect container, extracting the Id.
 		// This will return gibberish if no container is found.
-		args := []string{"inspect", "--format={{.Id}}|{{.ID}}", container.Name}
+		args := []string{"inspect", "--format={{.Id}}", container.Name}
 		output, outErr := commandOutput("docker", args)
 		if err == nil {
 			ids := strings.Split(output, "|")
