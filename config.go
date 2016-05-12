@@ -55,18 +55,18 @@ func readCraneData(filename string) Containers {
 		print.Notice("Using a Cranefile is deprecated. Please use crane.json/crane.yaml instead.\n")
 	}
 
+	environ_data := []byte(os.ExpandEnv(string(data)))
 	ext := filepath.Ext(filename)
 	if ext == ".json" {
-		return unmarshalJSON(data)
+		return unmarshalJSON(environ_data)
 	} else if ext == ".yml" || ext == ".yaml" {
-		return unmarshalYAML(data)
+		return unmarshalYAML(environ_data)
 	} else if ext == "" {
-		return unmarshalJSON(data)
+		return unmarshalJSON(environ_data)
 	} else {
 		panic("Unrecognized file extension")
 	}
 }
-
 
 // Thanks to https://github.com/markpeek/packer/commit/5bf33a0e91b2318a40c42e9bf855dcc8dd4cdec5
 func displaySyntaxError(data []byte, syntaxError error) (err error) {
@@ -114,11 +114,13 @@ type Targets interface {
 }
 
 type AllTargets string
+
 func (AllTargets) Includes(name string) bool {
 	return true
 }
 
 type TargetSet map[string]bool
+
 func (t TargetSet) Includes(name string) bool {
 	return t[name]
 }
