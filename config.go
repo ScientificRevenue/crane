@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/michaelsauter/crane/print"
 	"bytes"
 	"encoding/json"
-	"path/filepath"
 	"fmt"
+	"github.com/michaelsauter/crane/print"
 	"gopkg.in/v1/yaml"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -123,7 +123,7 @@ func (t TargetSet) Includes(name string) bool {
 	return t[name]
 }
 
-func NewTargets(target_spec string) Targets  {
+func NewTargets(target_spec string) Targets {
 	if len(target_spec) == 0 {
 		return AllTargets("")
 	}
@@ -138,5 +138,5 @@ func NewTargets(target_spec string) Targets  {
 }
 
 func isManualTargetting() bool {
-	return  targetsSpecifiedManually
+	return targetsSpecifiedManually
 }
